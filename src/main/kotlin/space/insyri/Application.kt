@@ -1,17 +1,6 @@
 package space.insyri
 
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import space.insyri.plugins.*
-
 data class TitledFunction(val title: String, val fn: Function<Unit>)
-
-fun read(prompt: String): String {
-    println(prompt)
-    print("> ")
-    return readln()
-}
 
 fun main() {
     val functions = arrayOf(
@@ -26,23 +15,14 @@ fun main() {
     }
     println()
 
-    var input : String?
-    var selection : Int
-    do {
-        input = read("Please select an action by responding with the according digit.")
-        if (input.isBlank() || input.toIntOrNull() == null) {
-            println("Invalid response: must be a selection")
-            continue
-        }
+    val selection = Prompt("Please select an action by responding with the according digit.") { x -> x.toInt() }
+        .apply {
+            addPreConversionCheck(fun(x) = x.isBlank() || (x.toIntOrNull() == null),
+                "must be a selection")
 
-        selection = input.toInt()
-        if (!(1..functions.size).contains(selection)) {
-            println("Invalid response: must be between 1 and ${functions.size}")
-            continue
-        }
-
-        break
-    } while (true)
+            addPostConversionCheck(fun(x) = !(1..functions.size).contains(x),
+                "must be between 1 and ${functions.size}")
+        }.run { execute() }
 
     println(functions[selection - 1].fn)
 }
