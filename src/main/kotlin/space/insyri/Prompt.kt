@@ -6,7 +6,34 @@ fun read(prompt: String): String {
     return readln()
 }
 
-val x = Prompt("123") { x -> x.toInt() }
+fun promptInt(prompt: String, min: Int, max: Int): Int {
+    return Prompt("$prompt ($min to $max inclusively)") { x ->
+        x.toInt()
+    }.apply {
+        addPreConversionCheck({ x -> x.isBlank() || x.toIntOrNull() == null }, "must be a number")
+        addPostConversionCheck(
+            { x -> (min..max).contains(x) },
+            "must be between $min and $max inclusively"
+        )
+    }.execute()
+}
+
+fun promptYN(prompt: String): Boolean {
+    return Prompt("$prompt Y/N") { x ->
+        when (x) {
+            "Y", "y", "Yes", "yes", "YES" -> true
+            "N", "n", "No", "no", "NO" -> false
+            else -> false
+        }
+    }.apply {
+        addPreConversionCheck({ x ->
+            when (x) {
+                "Y", "y", "Yes", "yes", "YES", "N", "n", "No", "no", "NO" -> true
+                else -> false
+            }
+        }, "valid options: yes, no, y, n")
+    }.execute()
+}
 
 class Prompt<T>(
     prompt: String,
@@ -28,7 +55,7 @@ class Prompt<T>(
 
     fun execute(): T {
         var input: String
-        while(true) {
+        while (true) {
             input = read(prompt = _prompt)
             var skipPreStage = false
             for ((check, errString) in preConversionChecks) {

@@ -15,14 +15,7 @@ fun main() {
     }
     println()
 
-    val selection = Prompt("Please select an action by responding with the according digit.") { x -> x.toInt() }
-        .apply {
-            addPreConversionCheck(fun(x) = x.isBlank() || (x.toIntOrNull() == null),
-                "must be a selection")
-
-            addPostConversionCheck(fun(x) = !(1..functions.size).contains(x),
-                "must be between 1 and ${functions.size}")
-        }.run { execute() }
+    val selection = promptInt("Please select an action by responding with the according digit.", 1, functions.size)
 
     println(functions[selection - 1].fn)
 }
