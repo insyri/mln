@@ -1,7 +1,7 @@
 package space.insyri
 
-fun isOn(x: String) = x.equals("on", ignoreCase = true)
-fun isOff(x: String) = !isOn(x)
+import com.lordcodes.turtle.ShellLocation
+import com.lordcodes.turtle.shellRun
 
 fun manageServices() {
     val services = Config.readInternal().toMutableMap()
@@ -12,7 +12,7 @@ fun manageServices() {
                     "Would you like to register a service instead?")) {
             // register service
         } else {
-            println("Aborting.")
+            println("Aborting to the previous page.")
         }
         return
     }
@@ -49,4 +49,11 @@ fun manageServices() {
 
     services.remove(selectedServiceName)
     services[serviceName] = service
+}
+
+fun registerService() {
+    val url = Prompt("Enter the Git repository URL in HTTP form of your service") {}.execute()
+    shellRun() {
+        git.clone(url)
+    }
 }
