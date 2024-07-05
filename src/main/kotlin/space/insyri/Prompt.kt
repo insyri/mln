@@ -6,20 +6,30 @@ fun read(prompt: String): String {
     return readln()
 }
 
+fun promptStringInList(prompt: String, set: Set<String>): String {
+    return Prompt("$prompt R") { x -> x.lowercase() }.apply {
+        addPostConversionCheck({ x ->
+            set.any {
+                it.equals(x, ignoreCase = true)
+            }
+        }, "must be of valid options: ${set.joinToString(separator = ", ")}")
+    }.execute()
+}
+
 fun promptInt(prompt: String, min: Int, max: Int): Int {
     return Prompt("$prompt ($min to $max inclusively)") { x ->
         x.toInt()
     }.apply {
         addPreConversionCheck({ x -> x.isBlank() || x.toIntOrNull() == null }, "must be a number")
         addPostConversionCheck(
-            { x -> (min..max).contains(x) },
+            { x -> x !in min..max },
             "must be between $min and $max inclusively"
         )
     }.execute()
 }
 
 fun promptYN(prompt: String): Boolean {
-    return Prompt("$prompt Y/N") { x ->
+    return Prompt("$prompt (Y/N)") { x ->
         when (x) {
             "Y", "y", "Yes", "yes", "YES" -> true
             "N", "n", "No", "no", "NO" -> false
@@ -37,7 +47,7 @@ fun promptYN(prompt: String): Boolean {
 
 class Prompt<T>(
     prompt: String,
-    convertStringToType: (String) -> T
+    convertStringToType: (String) -> T,
 ) {
     private var _prompt = prompt
     private var _convertStringToType = convertStringToType
